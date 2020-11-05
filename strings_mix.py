@@ -1,19 +1,15 @@
-clean = lambda text: "".join([c for c in text if c.islower()])
+clean = lambda text: "".join([c for c in text if c.islower() and text.count(c) > 1])
 
-build_stats = lambda s1, s2: map(lambda c: get_stats(c, s1, s2), set(s1 + s2))
+build_stat = lambda c, s1c, s2c: ('=:', s1c, c) if s1c == s2c else (('1:', s1c, c) if (s1c > s2c) else ('2:', s2c, c))
 
-remove_singles = lambda stats: filter(lambda x: x[1] > 1, stats)
+build_stats = lambda s1, s2: map(lambda char: build_stat(char, s1.count(char), s2.count(char)), set(s1 + s2))
 
 sort = lambda stats: sorted(stats, key=lambda x: (-x[1], x[0], x[2]))
 
-build_from_stat = lambda x: x[0] + (x[2] * x[1])
+stat_as_text = lambda stat: stat[0] + (stat[2] * stat[1])
 
-
-def get_stats(c, s1, s2):
-    s1c, s2c = s1.count(c), s2.count(c)
-    return ('=:', s1c, c) if s1c == s2c else (('1:', s1c, c) if (s1c > s2c) else ('2:', s2c, c))
+stats_as_text = lambda stat: map(stat_as_text, stat)
 
 
 def mix(s1, s2):
-    sorted_pairs = sort(remove_singles(build_stats(clean(s1), clean(s2))))
-    return "/".join(map(build_from_stat, sorted_pairs))
+    return "/".join(stats_as_text(sort(build_stats(clean(s1), clean(s2)))))
